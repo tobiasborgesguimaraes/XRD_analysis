@@ -1,0 +1,3 @@
+[submodule "amorph"]
+	path = amorph
+	url = https://bitbucket.org/eggplantbren/amorph.git
