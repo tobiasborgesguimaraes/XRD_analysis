@@ -40,10 +40,8 @@ with open(config_path, 'w') as f:
 
 # Run AMORPH.exe
 
-exe_path = 'amorph//src//AMORPH.exe'
-process = subprocess.Popen([exe_path])
-process.wait()
-
+process = subprocess.run(['.//run.sh'], shell=True)
+print('the process is suposed to have ended at this point')
 
 
 # Save results file to the RESULTS directory
