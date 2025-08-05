@@ -1,10 +1,10 @@
-import numpy as np 
+import numpy as np
 import pandas as pd 
 import sys 
 import yaml
 import shutil
-
-
+import subprocess
+import os
 
 # This file should be executed along with the name of the file to be analysed, so to do it with the 'easy_data.txt' file, run 'uv run main.py easy_data', or 'python main.py easy_data'
 
@@ -40,13 +40,18 @@ with open(config_path, 'w') as f:
 
 # Run AMORPH.exe
 
-
-
-# Convert the results files to csv and json
+exe_path = 'amorph//src//AMORPH.exe'
+process = subprocess.Popen([exe_path])
+process.wait()
 
 
 
 # Save results file to the RESULTS directory
+
+
+
+
+# Convert the results files to csv and json
 
 
 
