@@ -1,0 +1,101 @@
+import pandas as pd 
+import numpy as np 
+import sys
+
+def main():
+    # Get arguments from command line
+    file_name = sys.argv[1]
+    print(sys.argv)
+
+    # Get the points and model parameters from the data (file_name.txt and file_name_results.txt)
+    data = get_points(file_name)
+    params = get_parameters(file_name)
+
+    # Run some analysis to generate graphs and possibly other useful data
+
+    # Save everything into an hdf5 file
+
+    # Output the file
+
+
+def get_points(file_name: str) -> pd.DataFrame:
+    
+    data_path = f'DATA/{file_name}.txt'
+    results_path = f'RESULTS/{file_name}_results.txt'
+
+    data = pd.read_table(data_path, header=26, sep='       ', names=['2theta', 'intensity'], engine='python')
+    size = len(data)
+
+    with open(results_path, 'r') as file:
+        content = file.read()[3:] # The indexing is here to disconsider the '#  ' at the beggining of posterior_sample.txt
+        lines = content.splitlines()
+
+        listColumnNames = lines[0].split(sep=', ')
+        listNumbers = [float(n) for n in lines[-1].split()]
+
+
+    my_dict = dict(zip(listColumnNames, listNumbers))
+    results_single_line = pd.DataFrame(my_dict, [0])
+
+    # Finally put the info inside posterior_sample.txt into our dataFrame
+    data['bg'] = [results_single_line.at[0, f'bg[{i}]'] for i in range(size)]
+    data['wide'] = [results_single_line.at[0, f'wide[{i}]'] for i in range(size)]
+    data['narrow'] = [results_single_line.at[0, f'narrow[{i}]'] for i in range(size)]
+    data['model_curve'] = [results_single_line.at[0, f'model_curve[{i}]'] for i in range(size)]
+
+    # Return our dataFrame
+    return data
+
+
+def get_parameters(file_name: str) -> dict:
+    
+    results_path = f'RESULTS/{file_name}_results.txt'
+
+    # Load the content into the results file
+    with open(results_path, 'r') as file:
+      content = file.read()[3:] # The indexing is here to disconsider the '#  ' at the beggining of posterior_sample.txt
+      lines = content.splitlines()
+
+      listColumnNames = lines[0].split(sep=', ')
+      listNumbers = [float(n) for n in lines[-1].split()]
+
+    my_dict = dict(zip(listColumnNames, listNumbers))
+    results_single_line = pd.DataFrame(my_dict, [0]) # That's a table with a single line, and each column is a parameter inside the original posterior_sample.txt
+
+    num_peaks1 = results_single_line.at[0, 'num_peaks1']
+    num_peaks2 = results_single_line.at[0, 'num_peaks2']
+    
+    backgound_parameters = {
+            'background': results_single_line.at[0, 'background'],
+            'n1': results_single_line.at[0, 'n_knots[0]'],
+            'n2': results_single_line.at[0, 'n_knots[1]'],
+            'n3': results_single_line.at[0, 'n_knots[2]'],
+            'n4': results_single_line.at[0, 'n_knots[3]']
+    }
+    
+    narrow_parameters = {
+            'num_peaks1': num_peaks1,
+            'centers': [results_single_line.at[0, f'center1[{i}]'] for i in range(int(num_peaks1))],
+            'widths': [results_single_line.at[0, f'width1[{i}]'] for i in range(int(num_peaks1))],
+            'areas': [results_single_line.at[0, f'log_amplitude1[{i}]'] for i in range(int(num_peaks1))]
+    }
+
+    wide_parameters = {
+            'num_peaks2': num_peaks2,
+            'centers': [results_single_line.at[0, f'center2[{i}]'] for i in range(int(num_peaks2))],
+            'widths': [results_single_line.at[0, f'width2[{i}]'] for i in range(int(num_peaks2))],
+            'areas': [results_single_line.at[0, f'log_amplitude2[{i}]'] for i in range(int(num_peaks2))]
+    }
+
+    # Save the parameters to a nested dictionary 
+    dict_parameters = {'bg_params': backgound_parameters, 'narrow_params': narrow_parameters, 'wide_params': wide_parameters} 
+
+    return dict_parameters
+
+
+
+if __name__ == "__main__":
+    print('Run correctly!')
+    main()
+
+
