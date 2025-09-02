@@ -74,17 +74,17 @@ def get_parameters(file_name: str) -> dict:
     }
     
     narrow_parameters = {
-            'num_peaks1': num_peaks1,
+            'num_peaks': num_peaks1,
             'centers': [results_single_line.at[0, f'center1[{i}]'] for i in range(int(num_peaks1))],
             'widths': [results_single_line.at[0, f'width1[{i}]'] for i in range(int(num_peaks1))],
-            'areas': [results_single_line.at[0, f'log_amplitude1[{i}]'] for i in range(int(num_peaks1))]
+            'areas': [np.exp(results_single_line.at[0, f'log_amplitude1[{i}]']) for i in range(int(num_peaks1))]
     }
 
     wide_parameters = {
-            'num_peaks2': num_peaks2,
+            'num_peaks': num_peaks2,
             'centers': [results_single_line.at[0, f'center2[{i}]'] for i in range(int(num_peaks2))],
             'widths': [results_single_line.at[0, f'width2[{i}]'] for i in range(int(num_peaks2))],
-            'areas': [results_single_line.at[0, f'log_amplitude2[{i}]'] for i in range(int(num_peaks2))]
+            'areas': [np.exp(results_single_line.at[0, f'log_amplitude2[{i}]']) for i in range(int(num_peaks2))]
     }
 
     # Save the parameters to a nested dictionary 
