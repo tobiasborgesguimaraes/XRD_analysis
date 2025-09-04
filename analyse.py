@@ -2,8 +2,7 @@ import pandas as pd
 import numpy as np 
 import matplotlib.pyplot as plt
 import sys
-import h5py
-import cv2
+import os
 
 def main():
     # Get arguments from command line
@@ -14,19 +13,13 @@ def main():
     points = get_points(file_name)
     params = get_parameters(file_name)
 
+    # Create a new folder for storing all of the data
+    os.makedirs(f'RESULTS/{file_name}_analysis', exist_ok=True)
+    points.to_csv(f'RESULTS/{file_name}_analysis/points.csv', index=False)
+    params.to_json(f'RESULTS/{file_name}_analysis/params.json', index=False)
+
     # Run some analysis to generate graphs and possibly other useful data
     simple_plot(file_name, points)
-
-    # Save everything into an hdf5 file
-    with h5py.File(f'{file_name}.hdf5', 'w') as hdf:
-        model_data = hdf.create_group('Data')
-        model_data.create_dataset('points', data=points)
-
-        graphs = hdf.create_group('Graphs')
-        with open('simple_plot') as img:
-            graphs.create_dataset('simple_plot', data=img)
-
-    # Output the file
 
 
 def get_points(file_name: str) -> pd.DataFrame:
@@ -58,7 +51,7 @@ def get_points(file_name: str) -> pd.DataFrame:
     return data
 
 
-def get_parameters(file_name: str) -> dict:
+def get_parameters(file_name: str) -> pd.DataFrame:
     
     results_path = f'RESULTS/{file_name}_results.txt'
 
@@ -100,8 +93,9 @@ def get_parameters(file_name: str) -> dict:
 
     # Save the parameters to a nested dictionary 
     dict_parameters = {'bg_params': backgound_parameters, 'narrow_params': narrow_parameters, 'wide_params': wide_parameters} 
+    df = pd.DataFrame(dict_parameters)
 
-    return dict_parameters
+    return df 
 
 
 def simple_plot(file_name: str, data: pd.DataFrame):
@@ -125,7 +119,9 @@ def simple_plot(file_name: str, data: pd.DataFrame):
     plt.xlim(0, 85)
     plt.ylim(0, max(y_axis) * 1.05)
  
-    plt.savefig('simple_plot', format='png')
+    plt.savefig(f'RESULTS/{file_name}_analysis/simple_plot', format='png')
+
+
 
 if __name__ == "__main__":
     print('Run correctly!')
