@@ -2,8 +2,6 @@ import pandas as pd
 import numpy as np 
 import matplotlib.pyplot as plt
 import sys
-import h5py
-import cv2
 
 def main():
     # Get arguments from command line
@@ -15,18 +13,12 @@ def main():
     params = get_parameters(file_name)
 
     # Run some analysis to generate graphs and possibly other useful data
-    simple_plot(file_name, points)
+    # simple_plot(file_name, points)
 
     # Save everything into an hdf5 file
-    with h5py.File(f'{file_name}.hdf5', 'w') as hdf:
-        model_data = hdf.create_group('Data')
-        model_data.create_dataset('points', data=points)
-
-        graphs = hdf.create_group('Graphs')
-        with open('simple_plot') as img:
-            graphs.create_dataset('simple_plot', data=img)
-
-    # Output the file
+    with pd.HDFStore(f'{file_name}.h5', 'w') as store:
+        store['Points'] = points
+        store['Parameters'] = params
 
 
 def get_points(file_name: str) -> pd.DataFrame:
@@ -58,7 +50,7 @@ def get_points(file_name: str) -> pd.DataFrame:
     return data
 
 
-def get_parameters(file_name: str) -> dict:
+def get_parameters(file_name: str) -> pd.DataFrame:
     
     results_path = f'RESULTS/{file_name}_results.txt'
 
@@ -99,9 +91,13 @@ def get_parameters(file_name: str) -> dict:
     }
 
     # Save the parameters to a nested dictionary 
-    dict_parameters = {'bg_params': backgound_parameters, 'narrow_params': narrow_parameters, 'wide_params': wide_parameters} 
+    dict_parameters = {
+            'bg_params': backgound_parameters,
+            'narrow_params': narrow_parameters,
+            'wide_params': wide_parameters
+    } 
 
-    return dict_parameters
+    return pd.DataFrame(dict_parameters)
 
 
 def simple_plot(file_name: str, data: pd.DataFrame):
