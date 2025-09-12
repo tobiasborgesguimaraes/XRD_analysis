@@ -3,6 +3,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 import sys
 
+x_ray_sources = {
+        'Cu': 1.54,
+        'Mo': 0.71,
+        'Cr': 2.29,
+        'Co': 1.79,
+}
+
 def main():
     # Get arguments from command line
     file_name = sys.argv[1]
@@ -10,15 +17,17 @@ def main():
 
     # Get the points and model parameters from the data (file_name.txt and file_name_results.txt)
     points = get_points(file_name)
-    params = get_parameters(file_name)
+    bg_params, narrow_params, wide_params = get_parameters(file_name)
 
     # Run some analysis to generate graphs and possibly other useful data
     # simple_plot(file_name, points)
 
     # Save everything into an hdf5 file
-    with pd.HDFStore(f'{file_name}.h5', 'w') as store:
+    with pd.HDFStore(f'HDF5_files/{file_name}.h5', 'w') as store:
         store['Points'] = points
-        store['Parameters'] = params
+        store['BG_Parameters'] = bg_params 
+        store['NA_Parameters'] = narrow_params
+        store['WI_Parameters'] = wide_params
 
 
 def get_points(file_name: str) -> pd.DataFrame:
@@ -41,6 +50,7 @@ def get_points(file_name: str) -> pd.DataFrame:
     results_single_line = pd.DataFrame(my_dict, [0])
 
     # Finally put the info inside posterior_sample.txt into our dataFrame
+    data['q'] = [(4 * np.pi * np.sin(np.radians(a)/2)/(x_ray_sources['Cu'])) for a in data['2theta']]
     data['bg'] = [results_single_line.at[0, f'bg[{i}]'] for i in range(size)]
     data['wide'] = [results_single_line.at[0, f'wide[{i}]'] for i in range(size)]
     data['narrow'] = [results_single_line.at[0, f'narrow[{i}]'] for i in range(size)]
@@ -65,39 +75,32 @@ def get_parameters(file_name: str) -> pd.DataFrame:
     my_dict = dict(zip(listColumnNames, listNumbers))
     results_single_line = pd.DataFrame(my_dict, [0]) # That's a table with a single line, and each column is a parameter inside the original posterior_sample.txt
 
-    num_peaks1 = results_single_line.at[0, 'num_peaks1']
-    num_peaks2 = results_single_line.at[0, 'num_peaks2']
+    num_peaks1 = results_single_line.at[0, 'num_peaks1'] # for narrow parameters
+    num_peaks2 = results_single_line.at[0, 'num_peaks2'] # for wide parameters
     
-    backgound_parameters = {
-            'background': results_single_line.at[0, 'background'],
-            'n1': results_single_line.at[0, 'n_knots[0]'],
-            'n2': results_single_line.at[0, 'n_knots[1]'],
-            'n3': results_single_line.at[0, 'n_knots[2]'],
-            'n4': results_single_line.at[0, 'n_knots[3]']
-    }
+    background_parameters = pd.DataFrame({
+            'background': [results_single_line.at[0, 'background']],
+            'n1': [results_single_line.at[0, 'n_knots[0]']],
+            'n2': [results_single_line.at[0, 'n_knots[1]']],
+            'n3': [results_single_line.at[0, 'n_knots[2]']],
+            'n4': [results_single_line.at[0, 'n_knots[3]']]
+    })
     
-    narrow_parameters = {
-            'num_peaks': num_peaks1,
+    narrow_parameters = pd.DataFrame({
             'centers': [results_single_line.at[0, f'center1[{i}]'] for i in range(int(num_peaks1))],
             'widths': [results_single_line.at[0, f'width1[{i}]'] for i in range(int(num_peaks1))],
             'areas': [np.exp(results_single_line.at[0, f'log_amplitude1[{i}]']) for i in range(int(num_peaks1))]
-    }
+    })
 
-    wide_parameters = {
-            'num_peaks': num_peaks2,
+    wide_parameters = pd.DataFrame({
             'centers': [results_single_line.at[0, f'center2[{i}]'] for i in range(int(num_peaks2))],
             'widths': [results_single_line.at[0, f'width2[{i}]'] for i in range(int(num_peaks2))],
             'areas': [np.exp(results_single_line.at[0, f'log_amplitude2[{i}]']) for i in range(int(num_peaks2))]
-    }
+    })
 
-    # Save the parameters to a nested dictionary 
-    dict_parameters = {
-            'bg_params': backgound_parameters,
-            'narrow_params': narrow_parameters,
-            'wide_params': wide_parameters
-    } 
+     
 
-    return pd.DataFrame(dict_parameters)
+    return background_parameters, narrow_parameters, wide_parameters 
 
 
 def simple_plot(file_name: str, data: pd.DataFrame):

@@ -6,8 +6,9 @@ import sys
 def get_points(file_name: str) -> pd.DataFrame:
     
     data_path = f'DATA/{file_name}.txt'
-
-    return pd.read_table(data_path, header=26, sep='       ', names=['2theta', 'intensity'], engine='python')
+    
+    # header=26 and 7 spaces
+    return pd.read_table(data_path, header=26, sep='      ', names=['2theta', 'intensity'], engine='python')
 
 if __name__ == "__main__":
 
@@ -26,7 +27,7 @@ if __name__ == "__main__":
     plt.legend(fontsize=14)
     plt.title(f'XRD Analysis - Sample {file_name}', fontsize=16)
     # plt.grid(True)
-    plt.xlim(0, 85)
+    plt.xticks(np.arange(0, max(x_axis) + min(x_axis), 10))
     plt.ylim(0, max(y_axis) * 1.05)
 
  
