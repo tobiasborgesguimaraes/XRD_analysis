@@ -10,11 +10,8 @@ x_ray_sources = {
         'Co': 1.79,
 }
 
-def main():
-    # Get arguments from command line
-    file_name = sys.argv[1]
-    print(sys.argv)
-
+def main(file_name):
+    
     # Get the points and model parameters from the data (file_name.txt and file_name_results.txt)
     points = get_points(file_name)
     bg_params, narrow_params, wide_params = get_parameters(file_name)
@@ -128,6 +125,11 @@ def simple_plot(file_name: str, data: pd.DataFrame):
 
 if __name__ == "__main__":
     print('Run correctly!')
-    main()
+    
+    # Get arguments from command line
+    file_names = sys.argv[1:]
+    
+    for name in file_names:
+        main(name)
 
 

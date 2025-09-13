@@ -24,10 +24,11 @@ def quick_view(file_name: str, data: pd.DataFrame):
     plt.legend(fontsize=14)
     plt.title(f'XRD Analysis - Sample {file_name}', fontsize=16)
     # plt.grid(True)
-    plt.xlim(0, 85)
+    plt.xlim(0, max(x_axis) + min(x_axis))
     plt.ylim(0, max(y_axis) * 1.05)
 
     # Show the data
+    plt.savefig(f'GRAPHS/{file_name}_original.png')
     plt.show()
 
 
@@ -55,23 +56,16 @@ def model_plot(file_name: str, data: pd.DataFrame):
     plt.legend(fontsize=14)
     plt.title(f'XRD Analysis - Sample {file_name}', fontsize=16)
     # plt.grid(True)
-    plt.xlim(0, 85)
+    plt.xlim(0, max(x_axis) + min(x_axis))
     plt.ylim(0, max(y_axis) * 1.05)
 
     # Show the data
+    plt.savefig(f'GRAPHS/{file_name}_model.png')
     plt.show()
 
 
-
-
-
-
-if __name__ == "__main__":
-    print('Running correctly')
+def main(file_name):
     
-    # Get the points from the txt file
-    file_name = sys.argv[1]
-
     # Read hdf5 file
     hdf_file = pd.read_hdf(f'HDF5_files/{file_name}.h5', key='Points')
     print(hdf_file)
@@ -80,6 +74,16 @@ if __name__ == "__main__":
     model_plot(file_name, hdf_file)
 
 
+if __name__ == "__main__":
+    print('Running correctly')
+    
+    # Get the file names from the command line 
+    file_names = sys.argv[1:]
+
+    for name in file_names:
+        main(name)
+
+    
 
 
 
