@@ -48,7 +48,6 @@ def model_plot(file_name: str, data: pd.DataFrame):
     plt.plot(x_axis, wide, label='Amorphous', linewidth=2, color='blue')
     plt.plot(x_axis, narrow, label='Crystalline', linewidth=2, color='red')
     plt.plot(x_axis, model, label='Model Curve', linewidth=2, color='green')
-     
 
     # Plot info
     plt.xlabel("$2\\theta$ (degrees)", fontsize=14)

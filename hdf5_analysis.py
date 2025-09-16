@@ -32,7 +32,7 @@ def get_points(file_name: str) -> pd.DataFrame:
     data_path = f'DATA/{file_name}.txt'
     results_path = f'RESULTS/{file_name}_results.txt'
 
-    data = pd.read_table(data_path, header=26, sep='       ', names=['2theta', 'intensity'], engine='python')
+    data = pd.read_table(data_path, sep='      ', names=['2theta', 'intensity'], engine='python')
     size = len(data)
 
     with open(results_path, 'r') as file:
@@ -44,9 +44,9 @@ def get_points(file_name: str) -> pd.DataFrame:
 
 
     my_dict = dict(zip(listColumnNames, listNumbers))
-    results_single_line = pd.DataFrame(my_dict, [0])
-
-    # Finally put the info inside posterior_sample.txt into our dataFrame
+    results_single_line = pd.DataFrame(my_dict, [0])   
+    
+   # Finally put the info inside posterior_sample.txt into our dataFrame
     data['q'] = [(4 * np.pi * np.sin(np.radians(a)/2)/(x_ray_sources['Cu'])) for a in data['2theta']]
     data['bg'] = [results_single_line.at[0, f'bg[{i}]'] for i in range(size)]
     data['wide'] = [results_single_line.at[0, f'wide[{i}]'] for i in range(size)]
@@ -131,5 +131,6 @@ if __name__ == "__main__":
     
     for name in file_names:
         main(name)
+        print(f'{name} file analysed')
 
 
